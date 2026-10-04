@@ -70,15 +70,16 @@ function handle_error() {
 }
 # Function to enter bootloader mode
 # Usage  : enter_bootloader -t [type:usb|serial|can] -d [serial]
-#                           -u [canbus_uuid] -b [baudrate]
+#                           -u [canbus_uuid] -i [can_interface] -b [baudrate]
 function enter_bootloader() {
   local type=""
   local serial=""
   local baudrate=""
+  local can_interface=""
   local OPTIND=1
 
   # Parse command-line options
-  while getopts ":t:d:b:u:" opt; do
+  while getopts ":t:d:b:u:i:" opt; do
     case $opt in
     u)
       type='can'
@@ -87,11 +88,13 @@ function enter_bootloader() {
     t) type=$(echo "$OPTARG" | tr '[:upper:]' '[:lower:]') ;;
     d) serial="$OPTARG" ;;
     b) baudrate="$OPTARG" ;;
+    i) can_interface="$OPTARG" ;;
     \?) error_exit "Invalid option -$OPTARG. Usage: enter_bootloader -t" \
-      "<usb|serial|can> -d <serial> [-b baudrate] | -u <canbus_uuid>" ;;
+      "<usb|serial|can> -d <serial> [-b baudrate] |" \
+      "-u <canbus_uuid> [-i can_interface]" ;;
     :) error_exit "Option -$OPTARG requires an argument. Usage:" \
       "enter_bootloader -t <usb|serial> -d <serial> [-b baudrate] |" \
-      "-u <canbus_uuid>" ;;
+      "-u <canbus_uuid> [-i can_interface]" ;;
     esac
   done
 
@@ -103,7 +106,8 @@ function enter_bootloader() {
 
   if [[ -z "$serial" ]]; then
     error_exit "Serial argument is missing. Usage: enter_bootloader" \
-      "-t <usb|serial> -d <serial> [-b baudrate] | -u <canbus_uuid>"
+      "-t <usb|serial> -d <serial> [-b baudrate] |" \
+      "-u <canbus_uuid> [-i can_interface]"
   fi
 
   venv=$(find_klipper_venv)
@@ -131,7 +135,8 @@ except serial.SerialException as e:
   can)
     echo "Entering CAN bootloader mode for $serial"
     if [[ -f ~/katapult/scripts/flashtool.py ]]; then
-      ~/katapult/scripts/flashtool.py -r -u $serial
+      can_interface=${can_interface:-can0}
+      ~/katapult/scripts/flashtool.py -i "$can_interface" -r -u "$serial"
       sleep 2
     else
       error_exit "flashtool.py not found"

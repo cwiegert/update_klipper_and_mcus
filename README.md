@@ -207,11 +207,12 @@ The flash command depends on you mcus and the way you choose to flash your board
 > ### About bootloader entry
 > Helpers makes easier to enter bootloader,(Thanks to @beavis) : `bootloader_serial.py`, `bootloader_usb.py` or newer `enter_bootloader` can be used
 > ```
-> Usage: enter_bootloader -t <usb|serial|can> -d <serial> [-b baudrate] | -u <canbus_uuid>
+> Usage: enter_bootloader -t <usb|serial|can> -d <serial> [-b baudrate] | -u <canbus_uuid> [-i can_interface]
 >    -t     type of actual firmware connection (serial|usb|can)
 >    -d     serial id, only for serial and usb ( /dev/ttyAMA0, /dev/serial/by-id/...)
 >    -b     baudrate for serial default is 250000
->    -u     canbus_uuid (if set -t become optional)   
+>    -u     canbus_uuid (if set -t become optional)
+>    -i     CAN interface for CAN bootloader entry (default: can0)
 > ```
 
 ### mcus.ini examples (more to come) : 
@@ -260,7 +261,7 @@ action_command: ~/klippy-env/bin/python3 ~/katapult/scripts/flashtool.py -d /dev
 # using enter_bootoader function
 [octopus_usb2can]
 klipper_section: mcu
-quiet_command: enter_bootloader -u <YOUR_CANBUS_UUID>
+quiet_command: enter_bootloader -i can0 -u <YOUR_CANBUS_UUID>
 action_command: ~/klippy-env/bin/python3 ~/katapult/scripts/flashtool.py -d /dev/serial/by-id/usb-katapult_stm32f446xx_<BOARD_ID>-if00
 ```
 _source : [Roguyt_prepare_command branch ^^](../roguyt_prepare_command/mcus.ini)_
@@ -313,7 +314,7 @@ _source : [Klipper doc](https://www.klipper3d.org/RPi_microcontroller.html#build
 ```elixir
 [toolhead]
 klipper_section: mcu ebb36
-action_command: ~/klippy-env/bin/python3 ~/katapult/scripts/flashtool.py -u <canbus_uuid>
+action_command: ~/klippy-env/bin/python3 ~/katapult/scripts/flashtool.py -i can0 -u <canbus_uuid>
 ```
 
 #### Toolchanger : Usb connection
