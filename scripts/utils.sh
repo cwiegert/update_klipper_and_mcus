@@ -136,11 +136,19 @@ except serial.SerialException as e:
     can_interface=${can_interface:-can0}
     echo "Requesting CAN bootloader for UUID $serial on interface $can_interface"
     if [[ -f ~/katapult/scripts/flashtool.py ]]; then
-      ~/katapult/scripts/flashtool.py -i "$can_interface" -r -u "$serial"
+      local -a can_command=(
+        "$HOME/katapult/scripts/flashtool.py" -i "$can_interface" -r -u "$serial"
+      )
+      printf 'Command:'
+      printf ' %q' "${can_command[@]}"
+      printf '\n'
+      "${can_command[@]}"
       echo "CAN bootloader request completed; waiting for USB bootloader enumeration..."
+      echo "Command: sleep 2"
       sleep 2
       echo "Current /dev/serial/by-id devices:"
       if [[ -d /dev/serial/by-id ]]; then
+        echo "Command: ls -l /dev/serial/by-id"
         command ls -l /dev/serial/by-id
       else
         echo "/dev/serial/by-id does not exist"
