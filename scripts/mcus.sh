@@ -40,10 +40,8 @@ function load_mcus_config() {
         mcu_app["$section"]=unknown
         ;;
       flash_command | quiet_command | action_command)
-        # Make command quiet, except for stderr, when needed
-        if [[ $key == quiet_command ]] || $QUIET; then
-          value="$value >/dev/null"
-        fi
+        # Preserve command output while diagnosing flash/bootloader failures.
+        # A redirect explicitly present in mcus.ini is left unchanged.
 
         # append command to string
         if [ -n "${flash_actions["$section"]}" ]; then
@@ -231,8 +229,7 @@ function update_mcus() {
           # Add KCONFIG_CONFIG=config/$mcu after "make flash"
           command="${command/make\ flash/make\ flash\ $config_file_str}"
         fi
-        [[ ! "$command" =~ ">/dev/null" ]] && ! $QUIET &&
-          echo "Command: $command"
+        printf 'Command: %s\n' "$command"
         eval "$command"
       done
     fi
